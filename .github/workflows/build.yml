@@ -1,8 +1,22 @@
-name: Build ZMK firmware
+# .github/workflows/build.yml
+name: Build firmware
 
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.2
-
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python & West
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - run: pip install --user west
+      - run: west init -l config
+      - run: west update
+      - run: west build -s app -b nice_nano_v2 -- -DSHIELD=sofle_left
+      - uses: actions/upload-artifact@v3
+        with:
+          name: uff
+          path: build/left/zephyr/*.uf2
